@@ -4,7 +4,7 @@
 
 ![Status](https://img.shields.io/badge/status-early%20development-orange)
 ![Go Version](https://img.shields.io/badge/go-1.25-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/license-Apache-green)
 [![CI](https://github.com/nickemma/geostream/workflows/CI/badge.svg)](https://github.com/nickemma/geostream/actions)
 
 **A Geo-Distributed Platform with Intelligent Routing and Fault Tolerance**
