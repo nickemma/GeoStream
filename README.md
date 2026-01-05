@@ -1,413 +1,303 @@
 # GeoStream
 
-> Geo-distributed platform with intelligent routing and consensus-based coordination
+<div align="center">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://go.dev/)
-[![Project Status](https://img.shields.io/badge/Status-Active%20Development-green)]()
+![Status](https://img.shields.io/badge/status-early%20development-orange)
+![Go Version](https://img.shields.io/badge/go-1.25-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+[![CI](https://github.com/nickemma/geostream/workflows/CI/badge.svg)](https://github.com/nickemma/geostream/actions)
 
-**Live Demo:** [Coming Soon]  
-**Documentation:** [Link to docs]
+**A Geo-Distributed Platform with Intelligent Routing and Fault Tolerance**
+
+_Building distributed systems from first principles, one request at a time._
+
+[Architecture](docs/architecture.md) • [Roadmap](docs/roadmap.md) • [API Reference](docs/API_Reference.md)
+
+</div>
 
 ---
 
-## 📖 Overview
+## 🎯 What is GeoStream?
 
-GeoStream is a geo-distributed platform designed to route requests intelligently across multiple regions while maintaining low latency and high availability. Built as a **modular monolith** with clear service boundaries for future extraction based on real scaling needs.
+GeoStream is a **geo-distributed routing platform** built to understand how global-scale systems route traffic intelligently across multiple regions. Think of it as learning distributed systems by building the infrastructure that powers CDNs, global load balancers, and multi-region applications.
 
-### The Problem
+A complete implementation demonstrating mastery of:
 
-Modern applications need to serve global users with low latency, but building distributed systems is complex. Common challenges include:
+- **Intelligent geo-routing** (latency-based, cost-aware, availability-driven)
+- **Fault tolerance patterns** (circuit breakers, health checks, automatic failover)
+- **Distributed caching** (Redis with cache-aside and read-through strategies)
+- **Hexagonal architecture** (clean domain boundaries, testable without infrastructure)
+- **Consensus-based coordination** (Raft protocol for leader election - future phase)
+- **Observability** (metrics, logging, distributed tracing)
 
-- **High latency** for users far from servers
-- **Single points of failure** causing regional outages
-- **Data consistency** across multiple regions
-- **Complex coordination** between distributed services
-- **Over-engineered solutions** that add unnecessary complexity
+**⚠️ Important:** GeoStream is a **learning project** built to prove one engineer can understand and implement the routing intelligence behind systems like Cloudflare, AWS Route53, or Google Cloud Load Balancer. It's not production-ready.
 
-### The Solution
+---
 
-GeoStream provides intelligent geo-routing with fault tolerance, starting simple and scaling based on measured bottlenecks:
+## 🚀 Status
 
-- 🌍 **Intelligent Geo-Routing:** Routes requests to optimal regions based on latency, cost, and availability
-- 🛡️ **Fault Tolerance:** Circuit breakers, health checks, and automatic failover
-- ⚡ **Performance:** Distributed caching with Redis for sub-100ms response times
-- 📊 **Observability:** Built-in metrics, logging, and distributed tracing
-- 🔄 **Future-Ready:** Designed for consensus-based coordination when scale demands it
+| Component                   | Status         | Description                             |
+| --------------------------- | -------------- | --------------------------------------- |
+| **Project Structure**       | ✅ Complete    | Hexagonal architecture, CI/CD pipeline  |
+| **Geo-Routing Engine**      | 🔄 In Progress | Latency-based routing, region selection |
+| **Health Monitoring**       | 🔄 In Progress | Circuit breakers, health checks         |
+| **Distributed Caching**     | 📋 Planned     | Redis integration, cache strategies     |
+| **Observability Stack**     | 📋 Planned     | Prometheus, Grafana, OpenTelemetry      |
+| **Multi-Region Deployment** | 📋 Planned     | Deploy to 3+ AWS regions                |
+| **Raft Consensus**          | 📋 Planned     | Leader election, configuration sync     |
+| **Chaos Engineering**       | 📋 Planned     | Fault injection, partition testing      |
+
+**Current Milestone:** Building core geo-routing logic and fault tolerance patterns
 
 ---
 
 ## 🏗️ Architecture
 
-### Current Phase: Modular Monolith
+GeoStream follows a **hexagonal architecture** (ports & adapters) with clear separation of concerns:
+
 ```
-┌─────────────────────────────────────────────────┐
-│               GeoStream Monolith                │
-│                                                 │
-│  ┌──────────────┐  ┌──────────────┐           │
-│  │  API Layer   │  │ Middleware   │           │
-│  └──────┬───────┘  └──────┬───────┘           │
-│         │                  │                    │
-│  ┌──────▼──────────────────▼───────┐           │
-│  │      Core Business Logic         │           │
-│  │                                  │           │
-│  │  ┌─────────────────────────┐    │           │
-│  │  │  Geography Module       │    │           │
-│  │  │  - Location Detection   │    │           │
-│  │  │  - Routing Strategy     │    │           │
-│  │  │  - Latency Calculation  │    │           │
-│  │  └─────────────────────────┘    │           │
-│  │                                  │           │
-│  │  ┌─────────────────────────┐    │           │
-│  │  │  Health Module          │    │           │
-│  │  │  - Region Monitoring    │    │           │
-│  │  │  - Circuit Breakers     │    │           │
-│  │  │  - Automatic Failover   │    │           │
-│  │  └─────────────────────────┘    │           │
-│  │                                  │           │
-│  │  ┌─────────────────────────┐    │           │
-│  │  │  Storage Module         │    │           │
-│  │  │  - Data Access Layer    │    │           │
-│  │  │  - Cache Management     │    │           │
-│  │  └─────────────────────────┘    │           │
-│  └──────────────────────────────────┘           │
-│         │                  │                    │
-│  ┌──────▼──────┐    ┌──────▼──────┐           │
-│  │ PostgreSQL  │    │    Redis    │           │
-│  └─────────────┘    └─────────────┘           │
-└─────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    HTTP API Layer                        │
+│              (REST endpoints, middleware)                │
+└─────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────┐
+│                  Application Layer (Go)                  │
+│           Use Cases • Service Orchestration              │
+└─────────────────────────────────────────────────────────┘
+                              ↓
+┌──────────────────┬──────────────────┬──────────────────┐
+│  Geo-Routing     │   Health         │   Storage        │
+│  Domain          │   Domain         │   Domain         │
+│                  │                  │                  │
+│  - Location      │  - Circuit       │  - Region        │
+│    Detection     │    Breaker       │    Config        │
+│  - Routing       │  - Health        │  - Cache         │
+│    Strategy      │    Check         │    Management    │
+│  - Latency       │  - Failover      │                  │
+│    Calc          │                  │                  │
+└──────────────────┴──────────────────┴──────────────────┘
+                              ↓
+┌──────────────────┬──────────────────┬──────────────────┐
+│  Repository      │  Repository      │  Repository      │
+│  Interfaces      │  Interfaces      │  Interfaces      │
+│  (Ports)         │  (Ports)         │  (Ports)         │
+└──────────────────┴──────────────────┴──────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────┐
+│              Infrastructure Layer (Adapters)             │
+│   PostgreSQL • Redis • HTTP Client • Monitoring          │
+└─────────────────────────────────────────────────────────┘
 ```
 
 **Design Principles:**
 
-1. **Clear Module Boundaries:** Each module has well-defined interfaces and responsibilities
-2. **Dependency Injection:** Modules depend on interfaces, not concrete implementations
-3. **Single Process:** All modules run in the same binary for simplicity and performance
-4. **Observability First:** Metrics and logging at every layer to identify bottlenecks
-5. **Future Extraction Ready:** Modules can become services when data shows the need
+- **Hexagonal Architecture** - Domain logic isolated from infrastructure
+- **Dependency Inversion** - Domain depends on interfaces, not concrete implementations
+- **Single Responsibility** - Each module has one reason to change
+- **Testability First** - Business logic testable without databases or networks
 
-### Why Modular Monolith?
-
-**Current Benefits:**
-- ✅ Faster development (no network calls between modules)
-- ✅ Simpler debugging (single codebase, unified logs)
-- ✅ Lower operational overhead (one deployment, one database)
-- ✅ Easier testing (integration tests without distributed complexity)
-- ✅ Better performance (in-process function calls vs network RPCs)
-
-**Future-Ready:**
-- ✅ Clear module boundaries make service extraction straightforward
-- ✅ Metrics identify which modules need independent scaling
-- ✅ Interface-based design allows swapping implementations (local → remote)
+For detailed architecture, see [`docs/architecture.md`](docs/architecture.md).
 
 ---
 
-## 🎯 Key Features
+## 🎓 What You'll Learn
 
-### 1. Intelligent Geo-Routing
+Building GeoStream teaches you the same concepts used at Cloudflare (edge routing), AWS (Route53), and Google (Global Load Balancer):
 
-Routes incoming requests to the optimal region based on multiple factors:
+<details>
+<summary><b>Geo-Routing & Traffic Management</b></summary>
 
-- **Latency:** Minimizes round-trip time to user
-- **Cost:** Balances traffic across regions to optimize cloud spend
-- **Availability:** Automatically routes away from degraded regions
-- **Load:** Distributes traffic to prevent hotspots
+- Latency-based routing algorithms
+- Cost-aware traffic distribution
+- Availability-driven failover
+- Geographic proximity calculation (haversine formula)
+- DNS-based geo-routing (Route53 patterns)
 
-**Target Performance:** <100ms P99 latency globally
+</details>
 
-### 2. Fault Tolerance
+<details>
+<summary><b>Fault Tolerance Patterns</b></summary>
 
-Built-in resilience patterns to handle failures gracefully:
+- Circuit breaker implementation (open/half-open/closed states)
+- Health check strategies (active vs passive)
+- Automatic failover (<3s recovery time)
+- Retry logic with exponential backoff + jitter
+- Rate limiting (token bucket algorithm)
 
-- **Circuit Breakers:** Prevent cascading failures by failing fast
-- **Health Checks:** Continuous monitoring of region availability
-- **Automatic Failover:** Routes traffic away from unhealthy regions within <3s
-- **Retry Logic:** Exponential backoff with jitter for transient failures
-- **Rate Limiting:** Token bucket algorithm protects backend services
+</details>
 
-**Target Availability:** 99.95% uptime
+<details>
+<summary><b>Distributed Caching</b></summary>
 
-### 3. Distributed Caching
+- Cache-aside pattern
+- Read-through and write-through strategies
+- Cache invalidation (TTL-based and event-driven)
+- Redis clustering and replication
+- Cache warming and priming
 
-Multi-layer caching strategy for optimal performance:
+</details>
 
-- **Cache-Aside Pattern:** Application controls cache population
-- **Read-Through:** Automatic cache population on miss
-- **Write-Through:** Synchronous cache updates on writes
-- **Intelligent Invalidation:** TTL-based and event-driven invalidation
+<details>
+<summary><b>Distributed Systems (Future Phases)</b></summary>
 
-**Target Cache Hit Rate:** 80%+
+- Raft consensus protocol (leader election, log replication)
+- Handling network partitions and split-brain
+- Strong consistency vs eventual consistency trade-offs
+- Distributed configuration management
 
-### 4. Observability
+</details>
 
-Comprehensive monitoring and debugging:
+<details>
+<summary><b>Observability & Operations</b></summary>
 
-- **Structured Logging:** JSON logs with request context
-- **Metrics:** Prometheus-compatible metrics for all operations
-- **Distributed Tracing:** Request flow across modules (ready for future services)
-- **Health Endpoints:** `/health` and `/metrics` for monitoring
+- Prometheus metrics (request latency, error rates, cache hit ratio)
+- Distributed tracing with OpenTelemetry
+- Structured logging (JSON logs with context)
+- Grafana dashboards for real-time monitoring
+- Chaos engineering and fault injection
 
----
-
-## 🛣️ Roadmap
-
-### Phase 1: Modular Monolith MVP ✅ (Current)
-
-**Status:** In Progress  
-**Timeline:** Months 1-3  
-**Goals:**
-- ✅ Core geo-routing logic
-- ✅ Basic health checks and circuit breakers
-- 🔄 Redis caching layer
-- 🔄 Observability stack (Prometheus/Grafana)
-- ⏳ Deploy to single AWS region
-
-**Success Metrics:**
-- Route 1K requests/second with <100ms P99 latency
-- 99.9% uptime over 30 days
-- 80% cache hit rate
-
-### Phase 2: Multi-Region Deployment (Planned)
-
-**Status:** Not Started  
-**Timeline:** Months 4-6  
-**Goals:**
-- Deploy identical monoliths to 3+ regions (US, EU, Asia)
-- DNS-based geo-routing (Route53)
-- Regional databases (no cross-region coordination yet)
-- Monitor data consistency issues
-
-**What This Teaches:**
-- Real-world latency between regions
-- Data consistency challenges
-- Network partition scenarios
-- Cost of multi-region infrastructure
-
-**When to Start:** After Phase 1 metrics show single-region bottlenecks
-
-### Phase 3: Consensus-Based Coordination (Future)
-
-**Status:** Research Phase  
-**Timeline:** Months 7-12  
-**Prerequisites:**
-- Phase 2 complete
-- Observed data inconsistency problems
-- Clear need for cross-region coordination
-
-**Goals:**
-- Implement Raft consensus protocol from scratch in Go
-- Deploy Raft cluster (3-5 nodes) for configuration management
-- Use Raft for leader election and automatic failover
-- Maintain strong consistency for critical data
-
-**Research Activities (Parallel):**
-- Complete MIT 6.824 Distributed Systems course
-- Implement Raft in isolation (separate learning repo)
-- Study Raft paper and related consensus protocols (Paxos, Multi-Paxos)
-- Build toy distributed systems to understand failure modes
-
-**When to Start:** Only if Phase 2 metrics show coordination is bottleneck
-
-### Phase 4: Selective Service Extraction (If Needed)
-
-**Status:** Hypothetical  
-**Timeline:** Month 12+  
-**Triggers:** Metrics showing specific modules as bottlenecks
-
-**Candidates for Extraction:**
-1. **Geo-routing service** (if CPU-bound and blocking other operations)
-2. **Health monitoring service** (if needs different scaling characteristics)
-3. **Caching layer** (if single Redis instance becomes bottleneck)
-
-**What Stays in Monolith:**
-- Core business logic (routing decisions)
-- Data access layer (unless database sharding needed)
-- Simple CRUD operations
+</details>
 
 ---
 
-## 🧠 Learning Approach
+## 📍 Roadmap
 
-This project is both a **product** and a **learning journey** in distributed systems.
+### **Phase 1: Core Routing Logic** (Current)
 
-### Parallel Learning Tracks
+- [x] Project structure with hexagonal architecture
+- [x] CI/CD pipeline (GitHub Actions)
+- [ ] Geo-routing domain logic (latency calculation, region selection)
+- [ ] Location detection (GeoIP, IP geolocation)
+- [ ] Basic health checks (HTTP ping)
+- [ ] In-memory region configuration
 
-**Track 1: Building (70%)**
-- Implement features in modular monolith
-- Measure performance and identify bottlenecks
-- Iterate based on real data
+**Goal:** Single-region system with intelligent routing logic
 
-**Track 2: Studying Theory (20%)**
-- MIT 6.824 Distributed Systems lectures and labs
-- Reading foundational papers: Raft, Paxos, Spanner, Dynamo, Bigtable
-- Understanding CAP theorem, consistency models, replication strategies
+### **Phase 2: Fault Tolerance**
 
-**Track 3: Experimentation (10%)**
-- Implement distributed patterns in isolation (separate repos)
-- Build toy systems to understand failure modes
-- Test consensus algorithms without production pressure
+- [ ] Circuit breaker implementation
+- [ ] Automatic failover (route away from unhealthy regions)
+- [ ] Retry logic with backoff
+- [ ] Rate limiting (protect backend services)
+- [ ] PostgreSQL for persistent configuration
 
-### Why This Approach?
+**Goal:** Resilient system that handles failures gracefully
 
-**Traditional Approach (Build First, Learn Later):**
-- ❌ Makes costly architectural mistakes
-- ❌ Over-engineers solutions without understanding trade-offs
-- ❌ Struggles to debug distributed failures
+### **Phase 3: Caching & Performance**
 
-**Academic Approach (Learn First, Never Build):**
-- ❌ Theory without practical context
-- ❌ Doesn't understand real-world constraints
-- ❌ Can't apply knowledge to production systems
+- [ ] Redis integration (distributed cache)
+- [ ] Cache-aside pattern implementation
+- [ ] Read-through caching
+- [ ] Cache invalidation strategies
+- [ ] Observability stack (Prometheus, Grafana)
 
-**This Approach (Build Simple, Study Deep, Scale Smart):**
-- ✅ Validates ideas quickly with simple architecture
-- ✅ Understands theory deeply through parallel study
-- ✅ Applies patterns only when data shows need
-- ✅ Makes informed architectural decisions based on trade-offs
+**Goal:** Sub-100ms P99 latency globally
 
----
+### **Phase 4: Multi-Region Deployment**
 
-## 🔧 Tech Stack
+- [ ] Deploy identical instances to 3+ AWS regions
+- [ ] DNS-based geo-routing (Route53)
+- [ ] Regional databases (no cross-region coordination yet)
+- [ ] Monitor data consistency issues
+- [ ] Measure real-world latencies
 
-### Core Languages
-- **Go:** Primary language for performance and concurrency
-- **Rust:** System-level components requiring memory safety (future)
+**Goal:** Multi-region deployment with observed trade-offs
 
-### Data Storage
-- **PostgreSQL:** Primary data store (JSONB for flexible schemas)
-- **Redis:** Caching layer (single instance → cluster when needed)
+### **Phase 5: Consensus & Coordination** (Future)
 
-### Infrastructure
-- **Kubernetes:** Container orchestration (future multi-region deployment)
-- **Terraform:** Infrastructure as code
-- **Docker:** Containerization
+- [ ] Implement Raft consensus protocol from scratch
+- [ ] Deploy Raft cluster (3-5 nodes) for config management
+- [ ] Leader election and automatic failover
+- [ ] Strong consistency for critical data
+- [ ] Cross-region coordination
 
-### Observability
-- **Prometheus:** Metrics collection and alerting
-- **Grafana:** Metrics visualization
-- **OpenTelemetry:** Distributed tracing (ready for future microservices)
+**Goal:** Consensus-based coordination (only if Phase 4 shows need)
 
-### Cloud Providers
-- **AWS:** Primary cloud (EC2, RDS, ElastiCache, Route53, CloudWatch)
-- **GCP:** Secondary cloud for multi-cloud strategy (future)
+For detailed milestones, see [`docs/roadmap.md`](docs/roadmap.md).
 
 ---
 
-## 📊 Metrics & Monitoring
+## 🛠️ Tech Stack
 
-### Key Performance Indicators (KPIs)
-
-**Latency Metrics:**
-- P50, P95, P99 response times by region
-- Cache hit/miss latency
-- Database query latency
-
-**Availability Metrics:**
-- Uptime percentage per region
-- Failed health checks
-- Circuit breaker trips
-- Failover events
-
-**Throughput Metrics:**
-- Requests per second
-- Cache requests per second
-- Database connections
-
-**Business Metrics:**
-- Geographical distribution of users
-- Cost per request by region
-- Infrastructure spend
-
-### Monitoring Dashboards
-
-**1. Real-Time Operations Dashboard**
-- Current request rate
-- Active regions and health status
-- Circuit breaker states
-- Cache hit rates
-
-**2. Performance Dashboard**
-- Latency heatmaps by region
-- P99 latency trends
-- Slow query analysis
-- Cache performance
-
-**3. Cost Dashboard**
-- Spend by region
-- Cost per 1M requests
-- Infrastructure utilization
+| Layer              | Technology                         | Why                                          |
+| ------------------ | ---------------------------------- | -------------------------------------------- |
+| **Application**    | Go 1.21+                           | Excellent concurrency, network libraries     |
+| **Database**       | PostgreSQL 14+                     | JSONB for flexible schemas, reliability      |
+| **Cache**          | Redis 7+                           | In-memory performance, clustering            |
+| **RPC**            | REST (future gRPC)                 | Simple to start, gRPC for service extraction |
+| **Cloud**          | AWS Multi-Region                   | Real-world deployment constraints            |
+| **Observability**  | Prometheus, Grafana, OpenTelemetry | Industry-standard monitoring                 |
+| **Infrastructure** | Terraform, Docker                  | Infrastructure as code, containerization     |
 
 ---
 
-## 🚀 Quick Start
+## 🚦 Quick Start
 
 ### Prerequisites
-- Go 1.21+
+
+- Go 1.25
 - PostgreSQL 14+
 - Redis 7+
 - Docker & Docker Compose (optional)
 
-### Local Development
+### Run Locally
 
-1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/geostream.git
+# Clone the repository
+git clone https://github.com/nickemma/geostream.git
 cd geostream
-```
 
-2. **Set up environment**
-```bash
+# Set up environment
 cp .env.example .env
 # Edit .env with your configuration
-```
 
-3. **Run with Docker Compose (Recommended)**
-```bash
+# Run with Docker Compose (recommended)
 docker-compose up
-```
 
-4. **Or run manually**
-```bash
-# Start dependencies
+# Or run manually
 docker-compose up postgres redis -d
-
-# Run migrations
 make migrate-up
-
-# Start server
 make run
 ```
 
-5. **Verify it's working**
+### Verify It's Working
+
 ```bash
+# Health check
 curl http://localhost:8080/health
-```
 
-### Configuration
+# Get optimal region for a location
+curl http://localhost:8080/api/v1/route \
+  -H "Content-Type: application/json" \
+  -d '{"client_ip": "8.8.8.8", "service": "api"}'
 
-Key environment variables:
-```bash
-# Server
-PORT=8080
-ENVIRONMENT=development
-
-# Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/geostream
-
-# Redis
-REDIS_URL=redis://localhost:6379
-
-# Monitoring
-METRICS_ENABLED=true
-LOG_LEVEL=info
+# Response
+{
+  "region": "us-west-2",
+  "latency_ms": 45,
+  "reason": "lowest_latency"
+}
 ```
 
 ---
 
+## 📖 Documentation
+
+- **[Architecture Overview](docs/architecture.md)** - Hexagonal architecture deep dive, module boundaries
+- **[API Reference](docs/API_Reference.md)** - REST API endpoints, request/response formats
+- **[Roadmap](docs/roadmap.md)** - Detailed phase-by-phase milestones
+
+---
+
 ## 🧪 Testing
+
 ```bash
 # Run all tests
 make test
+
+# Run with race detector (recommended)
+make test-race
 
 # Run with coverage
 make test-coverage
@@ -421,86 +311,131 @@ make benchmark
 
 ### Testing Strategy
 
-- **Unit Tests:** Each module's business logic
-- **Integration Tests:** Module interactions and database
-- **Load Tests:** Performance under realistic traffic
-- **Chaos Tests:** Behavior during failures (future)
+- **Unit Tests** - Domain logic, pure business rules
+- **Integration Tests** - Repository implementations, database interactions
+- **Load Tests** - Performance under realistic traffic patterns
 
 ---
 
-## 📚 Documentation
+## 🌟 Why This Exists
 
-- **[Architecture](docs/architecture.md):** Deep dive into system design
-- **[API Reference](docs/api.md):** REST API documentation
-- **[Deployment](docs/deployment.md):** Production deployment guide
-- **[Contributing](CONTRIBUTING.md):** How to contribute
-- **[Learning Path](docs/learning.md):** Distributed systems resources
+> "I'm fascinated by how global-scale routing systems work, but most engineers never get to build them from scratch. GeoStream is my answer: a complete implementation that proves one person can still understand and build the kind of infrastructure that powers Cloudflare's edge network, AWS Route53, or Google's Global Load Balancer."
 
----
+**If this project demonstrates anything, it's that:**
 
-## 🤝 Contributing
+- Deep technical work still matters in an age of managed services
+- Understanding distributed systems from first principles beats clicking buttons in AWS console
+- One engineer with focus can build infrastructure that teaches fundamental concepts
 
-Contributions are welcome! This project is both a product and a learning exercise.
+This project is my **demonstration of expertise** - not just theoretical knowledge, but hands-on implementation of:
 
-**Ways to Contribute:**
-- 🐛 **Bug Reports:** Found an issue? Open an issue with reproduction steps
-- 💡 **Feature Requests:** Ideas for improvement? Start a discussion
-- 📝 **Documentation:** Help improve docs or add examples
-- 🔧 **Code:** Submit PRs for bug fixes or features
-- 📚 **Learning:** Share distributed systems resources or insights
+- Geo-routing algorithms used by CDNs
+- Fault tolerance patterns from SRE literature
+- Distributed caching strategies from high-scale systems
+- Consensus protocols from academic papers (Raft)
 
-**Before Contributing:**
-1. Read [CONTRIBUTING.md](CONTRIBUTING.md)
-2. Check existing issues and PRs
-3. Open an issue to discuss major changes
+**"I don't just use global load balancers. I build them from scratch."**
 
 ---
 
-## 📖 Learning Resources
+## 🎯 Who This Is For
 
-Resources that shaped this project:
-
-**Courses:**
-- [MIT 6.824 Distributed Systems](https://pdos.csail.mit.edu/6.824/)
-- [CMU 15-445 Database Systems](https://15445.courses.cs.cmu.edu/)
-
-**Papers:**
-- [Raft Consensus Algorithm](https://raft.github.io/raft.pdf)
-- [Google Spanner](https://research.google/pubs/pub39966/)
-- [Amazon Dynamo](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf)
-- [CAP Theorem](https://www.infoq.com/articles/cap-twelve-years-later-how-the-rules-have-changed/)
-
-**Books:**
-- *Designing Data-Intensive Applications* by Martin Kleppmann
-- *Database Internals* by Alex Petrov
+- **Engineers learning distributed systems** - Follow along, ask questions, contribute
+- **Infrastructure engineers** - See real-world implementation of routing patterns
+- **Students** - Bridge theory (papers) with practice (running code)
+- **Hiring managers** - This is what mastery looks like
 
 ---
 
-## 📝 License
+## 🧠 Learning Approach
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is both a **product** and a **learning journey**.
+
+### Parallel Tracks
+
+**Track 1: Building (70%)**
+
+- Implement features incrementally (modular monolith first)
+- Measure performance and identify real bottlenecks
+- Iterate based on data, not assumptions
+
+**Track 2: Studying Theory (20%)**
+
+- MIT 6.824 Distributed Systems course
+- Papers: Raft, Spanner, Dynamo, CAP theorem
+- Understanding consistency models, replication strategies
+
+**Track 3: Experimentation (10%)**
+
+- Implement patterns in isolation (toy systems)
+- Build distributed algorithms without production pressure
+- Learn failure modes through controlled experiments
+
+### Why This Approach?
+
+**Build Simple → Study Deep → Scale Smart**
+
+- ✅ Validate ideas quickly with simple architecture
+- ✅ Understand theory deeply through parallel study
+- ✅ Apply patterns only when data shows need
+- ✅ Make informed architectural decisions based on trade-offs
 
 ---
 
-## 💬 Contact
+## 📊 Key Metrics
 
-**Nicholas Emmanuel**
+### Performance Targets
 
-- Email: nicholasemmanuel321@gmail.com
-- GitHub: [@nickemma](https://github.com/nickemma)
-- LinkedIn: [Your LinkedIn](your-linkedin-url)
+| Metric                     | Phase 1 | Phase 3 | Phase 4 |
+| -------------------------- | ------- | ------- | ------- |
+| **P99 Latency**            | <200ms  | <100ms  | <150ms  |
+| **Throughput**             | 1K RPS  | 10K RPS | 50K RPS |
+| **Cache Hit Rate**         | N/A     | 80%+    | 85%+    |
+| **Failover Time**          | N/A     | <3s     | <3s     |
+| **Uptime (Single Region)** | 99.9%   | 99.95%  | 99.95%  |
+
+### Success Metrics (End of Project)
+
+- ✅ **Functional** - Multi-region deployment routing traffic intelligently
+- ✅ **Performant** - Sub-100ms P99 latency for geo-routing decisions
+- ✅ **Resilient** - Survives region failures with <3s recovery
+- ✅ **Documented** - 20-30 page architecture document
+- ✅ **Demonstrable** - Live demo routing traffic across regions
 
 ---
 
-## 🙏 Acknowledgments
+## 👤 Author
 
-- MIT 6.824 course staff for excellent distributed systems education
-- The Raft authors for a clear, implementable consensus algorithm
-- Martin Kleppmann for *Designing Data-Intensive Applications*
-- The Go community for excellent tooling and libraries
+**[@nickemma](https://github.com/nickemma)** • Building distributed systems from first principles
+
+💼 **Open to opportunities** at companies building serious infrastructure: Cloudflare, AWS, Google Cloud, Fastly, Akamai, or any team tackling global-scale routing and distributed systems.
+
+📧 **Contact:** nicholasemmanuel321@gmail.com  
+🐦 **Twitter:** [@techieemma](https://twitter.com/techieemma)  
+💼 **LinkedIn:** [Nicholas Emmanuel](https://linkedin.com/in/techieemma)
 
 ---
 
-**Built with ❤️ and a commitment to understanding distributed systems deeply**
+## ⭐ Support
 
-*"Whatever you do, work at it with all your heart, as working for the Lord." - Colossians 3:23*
+If you believe one engineer can still build production-grade distributed infrastructure, **star this repo** and follow along.
+
+Let's prove that deep technical work still matters.
+
+---
+
+## 📜 License
+
+Licensed under the Apache License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
+**Building Systems, Building Knowledge - One Request at a Time**
+
+_"Whatever you do, work at it with all your heart, as working for the Lord." - Colossians 3:23_
+
+[⬆ Back to Top](#geostream)
+
+</div>
